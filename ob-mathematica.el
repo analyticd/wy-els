@@ -19,12 +19,52 @@
 (add-to-list 'org-src-lang-modes '("mathematica" . "mma"))
 
 (defvar org-babel-tangle-lang-exts)
-(add-to-list 'org-babel-tangle-lang-exts '("mathematica" . "m"))
+(add-to-list 'org-babel-tangle-lang-exts '("mathematica" . "nb"))
 
 (defvar org-babel-default-header-args:mathematica '())
 
-(defvar org-babel-mathematica-command "MathematicaScript -script"
-  "Name of the command for executing Mathematica code.")
+;;; M-x customize-group RET ob-mathematica to edit
+(defcustom org-babel-mathematica-command
+  "MathematicaScript -script"
+  "Mathematica executable to use. Depending on operating system, possible values
+   could be:
+    /Applications/Mathematica.app/Contents/MacOS/MathematicaScript -script
+    /Applications/Mathematica.app/Contents/MacOS/MathKernel -script
+    /path/to/mash.pl
+    etc.
+  Note that mash.pl for Mathematica version 6 and above is available from
+  http://ai.eecs.umich.edu/people/dreeves/mash/mash.pl. For other versions, see
+  also http://stackoverflow.com/a/151656/3034580. The advantage of mash.pl
+  is that it can return the fully evaluated result of a Mathematica expression
+  whereas the -script options above have a constraint that they ensure the
+  evaluated Mathematica expression stays in InputForm (so that it can be read in
+  by another Mathematica script in a command line chain). Who cares? Because
+  if you are in org-mode you likely want to return the TeX/LaTeX output of a
+  Mathematica expression via the TeXForm command for immediate
+  typesetting with preview-latex, e.g.,
+  src_mathematica{Integrate[x^2,x] // TeXForm} \\frac{x^3}{3}
+  or
+  #+NAME: example-table
+  | 1 | 4 |
+  | 2 | 4 |
+  | 3 | 6 |
+  | 4 | 8 |
+  | 7 | 0 |
+
+  #+BEGIN_SRC mathematica :var x=example-table :results raw
+  (1+Transpose@x) // TeXForm
+  #+END_SRC
+
+  #+RESULTS:
+  \\left(
+  \\begin{array}{ccccc}
+   2 & 3 & 4 & 5 & 8 \\\\
+   5 & 5 & 7 & 9 & 1 \\\\
+  \\end{array}
+  \\right)
+"
+  :type 'string
+  :group 'ob-mathematica)
 
 (defun org-babel-expand-body:mathematica (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -43,7 +83,7 @@ called by `org-babel-execute-src-block'"
   (let* ((result-params (cdr (assoc :result-params params)))
 	 (full-body (org-babel-expand-body:mathematica body params))
 	 (tmp-script-file (org-babel-temp-file "mathematica-")))
-    ;; actually execute the source-code block 
+    ;; actually execute the source-code block
     (with-temp-file tmp-script-file (insert full-body))
     ;; (with-temp-file "/tmp/dbg" (insert full-body))
     ((lambda (raw)
@@ -72,4 +112,3 @@ specifying a variable of the same value."
     (format "%S" var)))
 
 (provide 'ob-mathematica)
-
