@@ -19,7 +19,7 @@
 (add-to-list 'org-src-lang-modes '("mathematica" . "mma"))
 
 (defvar org-babel-tangle-lang-exts)
-(add-to-list 'org-babel-tangle-lang-exts '("mathematica" . "nb"))
+(add-to-list 'org-babel-tangle-lang-exts '("mathematica" . "mma"))
 
 (defvar org-babel-default-header-args:mathematica '())
 
